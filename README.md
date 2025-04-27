@@ -18,7 +18,7 @@ cd easydigest
 
 4. 서버 실행
 ```
-python manage.py runserver
+python3 manage.py runserver
 ```
 
 5. 로컬 서버 접속
