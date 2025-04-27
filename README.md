@@ -6,15 +6,20 @@
 git clone https://github.com/syeongkim/EasyDigest_back.git
 ```
 
-2. 백엔드 폴더로 이동
+2. 가상환경 실행
+```
+source venv/bin/activate
+```
+
+3. 백엔드 폴더로 이동
 ```
 cd easydigest
 ```
 
-3. 서버 실행
+4. 서버 실행
 ```
 python manage.py runserver
 ```
 
-4. 로컬 서버 접속
+5. 로컬 서버 접속
 - http://127.0.0.1:8000/
