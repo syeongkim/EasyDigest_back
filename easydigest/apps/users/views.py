@@ -63,16 +63,29 @@ def login_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
 
-    user = authenticate(request, username=username, password=password)
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response({'message': 'User not found'}, status=status.HTTP_400_BAD_REQUEST)
 
-    if user is not None:
-        login(request, user)
-        return Response({'message': 'Login successful.'})
-    else:
-        return Response({'message': 'Invalid crendentials.'}, status = status.HTTP_401_UNAUTHORIZED)
+    if not user.check_password(password):
+        return Response({'message': 'Incorrect password'}, status=status.HTTP_400_BAD_REQUEST)
+
+    login(request, user)
+    return Response({
+        'message': 'Login successful',
+        'nickname': user.nickname  # 👈 여기를 추가
+    })
+
 
 @csrf_exempt
 @api_view(['POST'])
 def logout_view(request):
     logout(request)
     return Response({'message': 'Logged out successfully'})
+
+@api_view(['GET'])
+def check_username(request):
+    username = request.GET.get('username', '')
+    exists = User.objects.filter(username=username).exists()
+    return Response({'exists': exists})
