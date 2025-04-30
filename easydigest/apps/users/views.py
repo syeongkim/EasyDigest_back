@@ -4,6 +4,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 User = get_user_model()
 
@@ -72,9 +74,13 @@ def login_view(request):
         return Response({'message': 'Incorrect password'}, status=status.HTTP_400_BAD_REQUEST)
 
     login(request, user)
+    refresh = RefreshToken.for_user(user)
+
     return Response({
         'message': 'Login successful',
-        'nickname': user.nickname  # 👈 여기를 추가
+        'nickname': user.nickname,
+        'access': str(refresh.access_token),
+        'refresh': str(refresh)
     })
 
 
