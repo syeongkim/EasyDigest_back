@@ -8,6 +8,7 @@ from rest_framework import status
 User = get_user_model()
 
 # Create your views here.
+@csrf_exempt
 @api_view(['POST'])
 def signup(request):
     username = request.data.get('username')
