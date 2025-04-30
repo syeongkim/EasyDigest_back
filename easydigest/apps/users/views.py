@@ -18,37 +18,37 @@ def signup(request):
 
     if not username:
         return Response(
-            {'error': 'Username is required.'},
+            {'message': 'Username is required.'},
             status = status.HTTP_400_BAD_REQUEST
         )
     
     if not password:
         return Response(
-            {'error': 'Password is required.'},
+            {'message': 'Password is required.'},
             status = status.HTTP_400_BAD_REQUEST
         )
     
     if not nickname:
         return Response(
-            {'error': 'Nickname is required.'},
+            {'message': 'Nickname is required.'},
             status = status.HTTP_400_BAD_REQUEST
         )
     
     if not email:
         return Response(
-            {'error': 'Email is required.'},
+            {'message': 'Email is required.'},
             status = status.HTTP_400_BAD_REQUEST
         )
     
     if User.objects.filter(username=username).exists():
         return Response(
-            {'error': 'Username already exists.'},
+            {'message': 'Username already exists.'},
             status = status.HTTP_400_BAD_REQUEST
         )
     
     if User.objects.filter(email=email).exists():
         return Response(
-            {'error': 'Email already exists.'},
+            {'message': 'Email already exists.'},
             status = status.HTTP_400_BAD_REQUEST
         )
 
@@ -68,7 +68,7 @@ def login_view(request):
         login(request, user)
         return Response({'message': 'Login successful.'})
     else:
-        return Response({'error': 'Invalid crendentials.'}, status = status.HTTP_401_UNAUTHORIZED)
+        return Response({'message': 'Invalid crendentials.'}, status = status.HTTP_401_UNAUTHORIZED)
 
 @csrf_exempt
 @api_view(['POST'])
