@@ -4,7 +4,7 @@ from .models import Article
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ['id', 'user', 'title', 'content', 'summary', 'created_at']
+        fields = ['id', 'user', 'content', 'summary', 'created_at']
         read_only_fields = ['user', 'summary', 'created_at']
     
     def create(self, validated_data):
