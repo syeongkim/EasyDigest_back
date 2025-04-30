@@ -12,6 +12,7 @@ User = get_user_model()
 def signup(request):
     username = request.data.get('username')
     password = request.data.get('password')
+    nickname = request.data.get('nickname')
     email = request.data.get('email')
     interest = request.data.get('interest')
 
@@ -24,6 +25,12 @@ def signup(request):
     if not password:
         return Response(
             {'error': 'Password is required.'},
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    
+    if not nickname:
+        return Response(
+            {'error': 'Nickname is required.'},
             status = status.HTTP_400_BAD_REQUEST
         )
     
@@ -45,7 +52,7 @@ def signup(request):
             status = status.HTTP_400_BAD_REQUEST
         )
 
-    user = User.objects.create_user(username=username, password=password, email=email, interest=interest)
+    user = User.objects.create_user(username=username, password=password, nickname=nickname, email=email, interest=interest)
     login(request, user)
     return Response({'message': 'Signup successful and logged in.'})
 

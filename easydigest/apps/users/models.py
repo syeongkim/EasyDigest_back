@@ -3,6 +3,11 @@ from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 class User(AbstractUser):
+    nickname = models.CharField(
+        max_length=30,
+        blank=False,
+        null=False
+    )
     email = models.EmailField(unique=True)
 
     class InterestChoices(models.TextChoices):
@@ -11,6 +16,7 @@ class User(AbstractUser):
         ECONOMY = "경제", "경제"
         CULTURE = "문화", "문화"
         TECHNOLOGY = "기술", "기술"
+        ENTERTAIN = "연예", "연예"
 
     interest = models.CharField(
         max_length=20,
