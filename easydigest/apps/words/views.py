@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Word
+from .models import Word, LearnedWord
 from .serializers import WordSerializer
 from django.utils import timezone
 from .gpt import explain_word_in_context
@@ -40,30 +40,28 @@ def learn_word(request):
         )
     
     # 1. GPT로 쉬운 설명 생성
-    explanation = explain_word_in_context(article.content, word_text)
+    description = explain_word_in_context(article.content, word_text)
 
     # 2. pos 분류 (추가 필요)
+    pos = "명사"
 
     # 3. Word DB에 저장
-    word_instance = Word.objects.filter(
-        user=request.user, word=word_text, article_id=article_id
-    ).first()
-
-    if word_instance:
-        word_instance.ask_count += 1
-        word_instance.last_learned = timezone.now()
-        word_instance.description = explanation
-        word_instance.save()
-    else:
-        word_instance = Word.objects.create(
-            user = request.user,
-            article = article,
-            word = word_text,
-            pos = pos,
-            description = explanation,
-        )
+    word_obj, created = Word.objects.get_or_create(
+        user = request.user, word = word_text, 
+        defaults = {"description": description, "pos": pos}
+    )
+    if not created:
+        word_obj.ask_count += 1
+        word_obj.last_learned = timezone.now()
+        word_obj.description = description
+        word_obj.save()
     
-    serializer = WordSerializer(word_instance)
+    # 4. LearnedWord DB에 저장
+    _, created = LearnedWord.objects.get_or_create(
+        user = request.user, word = word_obj, article = article
+    )
+
+    serializer = WordSerializer(word_obj)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 # 사용자가 학습한 모든 단어 조회
@@ -78,6 +76,8 @@ def user_words(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def article_words(request, article_id):
-    words = Word.objects.filter(user=request.user, article=article_id).order_by('-last_learned')
+    learned = LearnedWord.objects.filter(user = request.user, article = article_id)
+    word_ids = learned.values_list('word_id', flat = True)
+    words = Word.objects.filter(id__in = word_ids)
     serializer = WordSerializer(words, many=True)
     return Response(serializer.data)
