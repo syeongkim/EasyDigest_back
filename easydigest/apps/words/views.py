@@ -8,7 +8,7 @@ from rest_framework import status
 from .models import Word
 from .serializers import WordSerializer
 from django.utils import timezone
-from .kogpt import explain_word_in_context
+from .gpt import explain_word_in_context
 from apps.articles.models import Article
 
 # 사용자가 학습한 단어를 words DB에 저장
