@@ -1,7 +1,10 @@
-!pip install openai
 import openai
+import os
+from dotenv import load_dotenv
 
-client = openai.OpenAI(api_key= "YOUR_API_KEY")
+load_dotenv()
+
+client = openai.OpenAI(api_key= os.getenv('OPENAI_KEY'))
 
 #retrieval
 
@@ -64,7 +67,7 @@ def generate_definition_with_gpt(word):
             max_tokens=150,
             temperature=0.7,
         )
-        return response['choices'][0]['message']['content'].strip()
+        return response.choices[0].message.content.strip()
     except Exception as e:
         return f"[GPT error]: {str(e)}"
 
@@ -89,7 +92,7 @@ def simplify_with_gpt(definition, word):
             max_tokens=150,
             temperature=0.7,
         )
-        return response['choices'][0]['message']['content'].strip()
+        return response.choices[0].message.content.strip()
     except Exception as e:
         return f"[GPT error]: {str(e)}"
 
