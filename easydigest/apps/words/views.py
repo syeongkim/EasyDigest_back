@@ -128,7 +128,9 @@ def generate_quiz(request):
     ).values_list("word__word", flat=True)
 
     # 퀴즈 후보 선정 (기사에 등장한 단어들 중에서 이번에 학습하진 않았지만, 과거에는 학습했던 단어들)
-    quiz_candidates = past_learned_words.exclude(word__in = learned_in_this_article)
+    quiz_candidates = past_learned_words.exclude(
+        word__in = learned_in_this_article
+    ).filter(correct_count__lt=3)
 
     if not quiz_candidates.exists():
         return Response(
@@ -143,7 +145,8 @@ def generate_quiz(request):
     # 보기 구성
     distractors = Word.objects.filter(
         user = request.user,
-        pos = pos
+        pos = pos,
+        correct_count__lt=3
     ).exclude(id=quiz_word.id)
 
     distractors = list(distractors)
@@ -162,3 +165,45 @@ def generate_quiz(request):
         "choices": serializer.data
     })
 
+# 퀴즈 결과 기록
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def submit_quiz(request):
+    question_word_id = request.data.get("question_word_id") # 정답인 단어의 id (correct_count를 증가시킬 단어의 id)
+    is_correct = request.data.get("is_correct") # 퀴즈 정답 여부
+
+    if question_word_id is None:
+        return Response(
+            {"message": "question_word_id is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if is_correct is None:
+        return Response(
+            {"message": "is_correct is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        word = Word.objects.get(id=question_word_id, user=request.user)
+    except Word.DoesNotExist:
+        return Response(
+            {"message": "단어를 찾을 수 없습니다."},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    if is_correct:
+        word.correct_count += 1
+        word.save()
+
+    serializer = WordSerializer(word)
+
+    return Response(
+        {
+            "message": "정답 기록 완료",
+            "is_correct": is_correct,
+            "word": serializer.data
+        },
+        status = status.HTTP_200_OK
+    )
+    
