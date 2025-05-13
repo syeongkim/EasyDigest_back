@@ -11,37 +11,13 @@ from django.utils import timezone
 from .gpt import explain_word_in_context
 from apps.articles.models import Article
 
-# 사용자가 학습한 단어를 words DB에 저장
+# 사용자가 단어 클릭하면 쉬운 설명 제공 + DB에 기록 저장
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def save_word(request):
-    data = request.data
-    word_text = data.get('word')
-    article_id = data.get('article')
-
-    word_instance = Word.objects.filter(
-        user=request.user, word=word_text, article_id=article_id
-    ).first()
-
-    if word_instance:
-        word_instance.ask_count += 1
-        word_instance.last_learned = timezone.now()
-        word_instance.save()
-        serializer = WordSerializer(word_instance)
-        return Response(serializer.data)
-    
-    serializer = WordSerializer(data=data)
-    if serializer.is_valid():
-        serializer.save(user=request.user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-# 사용자가 단어를 클릭하면 KoGPT로 생성한 쉬운 설명 제공
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def explain_word(request):
-    word_text = request.data.get('word')
-    article_id = request.data.get('article')
+def learn_word(request):
+    word_text = request.data.get('word_text')
+    article_id = request.data.get('article_id')
+    pos = request.data.get('pos')
 
     if not word_text:
         return Response(
@@ -63,12 +39,32 @@ def explain_word(request):
             status = status.HTTP_404_NOT_FOUND
         )
     
+    # 1. GPT로 쉬운 설명 생성
     explanation = explain_word_in_context(article.content, word_text)
 
-    return Response({
-        "word": word_text,
-        "explanation": explanation
-    })
+    # 2. pos 분류 (추가 필요)
+
+    # 3. Word DB에 저장
+    word_instance = Word.objects.filter(
+        user=request.user, word=word_text, article_id=article_id
+    ).first()
+
+    if word_instance:
+        word_instance.ask_count += 1
+        word_instance.last_learned = timezone.now()
+        word_instance.description = explanation
+        word_instance.save()
+    else:
+        word_instance = Word.objects.create(
+            user = request.user,
+            article = article,
+            word = word_text,
+            pos = pos,
+            description = explanation,
+        )
+    
+    serializer = WordSerializer(word_instance)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 # 사용자가 학습한 모든 단어 조회
 @api_view(['GET'])
