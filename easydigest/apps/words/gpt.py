@@ -1,5 +1,3 @@
-!pip install --quiet stanza requests transformers openai
-
 # Download Stanza Korean model
 import stanza
 stanza.download('ko')
