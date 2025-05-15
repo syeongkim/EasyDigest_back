@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Article
 from .serializers import ArticleSerializer
+from .gpt import summarize_article
 
 # Create your views here.
 @api_view(['POST', 'GET'])
@@ -36,3 +37,20 @@ def my_articles(request):
     articles = Article.objects.filter(user=user).order_by('-created_at')
     serializer = ArticleSerializer(articles, many=True)
     return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def generate_summary(request, article_id):
+    try:
+        article = Article.objects.get(id=article_id, user=request.user)
+    except Article.DoesNotExist:
+        return Response({'error': 'Article not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if article.summary:
+        return Response({'summary': article.summary}, status=status.HTTP_200_OK)
+
+    summary = summarize_article(article.content)
+    article.summary = summary
+    article.save()
+
+    return Response({'summary': summary}, status=status.HTTP_200_OK)
