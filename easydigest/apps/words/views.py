@@ -18,8 +18,7 @@ import re, random
 def learn_word(request):
     word_text = request.data.get('word_text')
     article_id = request.data.get('article_id')
-    pos = request.data.get('pos')
-
+    
     if not word_text:
         return Response(
             {"message": "word is required"},
