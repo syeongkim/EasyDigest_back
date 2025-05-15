@@ -8,7 +8,7 @@ from rest_framework import status
 from .models import Word, LearnedWord
 from .serializers import WordSerializer
 from django.utils import timezone
-from .gpt import explain_word_in_context
+from .gpt import analyze_pos_with_stanza, infer_overall_pos, retrieve_definition, generate_definition_with_gpt
 from apps.articles.models import Article
 import re, random
 
@@ -41,10 +41,14 @@ def learn_word(request):
         )
     
     # 1. GPT로 쉬운 설명 생성
-    description = explain_word_in_context(article.content, word_text)
+    # description = explain_word_in_context(article.content, word_text)
+    description = retrieve_definition(word_text)
+    if not description:
+        description = generate_definition_with_gpt(word_text)
 
     # 2. pos 분류 (추가 필요)
-    pos = "명사"
+    toks = analyze_pos_with_stanza(word_text)
+    pos = infer_overall_pos(toks)
 
     # 3. Word DB에 저장
     word_obj, created = Word.objects.get_or_create(
