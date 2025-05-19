@@ -44,7 +44,7 @@ def learn_word(request):
     description = retrieve_definition(word_text)
     if not description:
         description = generate_definition_with_gpt(description)
-    simplify_with_gpt(description, word_text)
+    description = simplify_with_gpt(description, word_text)
 
     # 2. pos 분류 (추가 필요)
     toks = analyze_pos_with_stanza(word_text)
