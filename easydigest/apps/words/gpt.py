@@ -7,8 +7,12 @@ import stanza
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 import openai
+import os
+from dotenv import load_dotenv
 
-client = openai.OpenAI(api_key= "YOUR_KEY")
+load_dotenv()
+OPENAI_KEY = os.getenv("OPENAI_KEY")
+client = openai.OpenAI(api_key= OPENAI_KEY)
 
 #retrieval
 
