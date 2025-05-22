@@ -8,3 +8,8 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'nickname', 'email', 'interest', 'total_correct_count', 'level']
         read_only_fields = ['username']
+
+class InterestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['interest']
