@@ -25,5 +25,25 @@ class User(AbstractUser):
         null=True
     )
 
+    @property
+    def total_correct_count(self):
+        from apps.words.models import Word
+        result = Word.objects.filter(user=self).aggregate(total=models.Sum('correct_count'))
+        return result['total'] or 0
+    
+    @property
+    def level(self):
+        correct = self.total_correct_count
+        if correct < 20:
+            return 1 
+        elif correct < 40:
+            return 2
+        elif correct < 60:
+            return 3
+        elif correct < 80:
+            return 4
+        else:
+            return 5
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
