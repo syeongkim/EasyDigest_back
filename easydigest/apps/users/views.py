@@ -1,12 +1,15 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
-from .serializers import UserSerializer
+from .serializers import UserSerializer, InterestSerializer
+import uuid
+import requests
 
 
 User = get_user_model()
@@ -163,3 +166,58 @@ def change_password(request):
         {"message": "비밀번호가 성공적으로 변경되었습니다."},
         status = status.HTTP_200_OK
     )
+
+# 구글 소셜 로그인
+@api_view(['POST'])
+def google_login(request):
+    token = request.data.get('token')
+    if not token:
+        return Response({'message': "No token provided"}, status = status.HTTP_400_BAD_REQUEST)
+    
+    resp = requests.get(f'https://oauth2.googleapis.com/tokeninfo?id_token={token}')
+    if resp.status_code != 200:
+        return Response({'message': 'Invalid token'}, status = status.HTTP_400_BAD_REQUEST)
+    
+    user_info = resp.json()
+
+    email = user_info.get('email')
+    name = user_info.get('name')
+
+    User = get_user_model()
+
+    user, created = User.objects.get_or_create(
+        email = email,
+        defaults= {
+            'username': f"{email.split('@')[0]}",
+            'nickname': name,
+            'password': make_password(None),
+            'is_social': True,
+        }
+    )
+
+    refresh = RefreshToken.for_user(user)
+
+    return Response({
+        'message': 'Login successful with google',
+        'username': user.username,
+        'nickname': user.nickname,
+        'email': user.email,
+        'access': str(refresh.access_token),
+        'refresh': str(refresh),
+    })
+
+# 구글 소셜 로그인 후 관심사 필드 설정
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def set_interest(request):
+    user = request.user
+    serializer = InterestSerializer(user, data=request.data, partial=True)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response({
+            'message': 'Save interest successfully',
+            'interest': user.interest
+        })
+    
+    return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)

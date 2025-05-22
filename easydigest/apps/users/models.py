@@ -25,6 +25,8 @@ class User(AbstractUser):
         null=True
     )
 
+    is_social = models.BooleanField(default=False)
+
     @property
     def total_correct_count(self):
         from apps.words.models import Word
