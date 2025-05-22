@@ -3,9 +3,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Article
-from .serializers import ArticleSerializer
+from .models import Article, LearnedArticle
+from .serializers import ArticleSerializer, LearnedArticleSerializer
 from .gpt import summarize_article
+from .utils import crawl_news_content
 
 # Create your views here.
 @api_view(['POST', 'GET'])
@@ -20,7 +21,29 @@ def article_list(request):
         articles = Article.objects.all().order_by('-created_at')
         serializer = ArticleSerializer(articles, many=True)
         return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def register_article(request):
+    url = request.data.get('url')
+    if not url:
+        return Response({'error': "URL is required"}, status=status.HTTP_400_BAD_REQUEST)
     
+    article, created = Article.objects.get_or_create(
+        url=url,
+        defaults={'content': crawl_news_content(url)}
+    )
+
+    # 여기에서 생성할지 따로 api 빼서 요청 들어오면 생성할지 고민 필요
+    if created and not article.summary:
+        article.summary = summarize_article(article.content)
+        article.save()
+
+    LearnedArticle.objects.get_or_create(user=request.user, article=article)
+
+    serializer = ArticleSerializer(article)
+    return Response(serializer.data)
+
 @api_view(['GET'])
 def article_detail(request, article_id):
     try:
@@ -33,16 +56,15 @@ def article_detail(request, article_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def my_articles(request):
-    user = request.user
-    articles = Article.objects.filter(user=user).order_by('-created_at')
-    serializer = ArticleSerializer(articles, many=True)
+    learned_articles = LearnedArticle.objects.filter(user=request.user).select_related('article').order_by('-learned_at')
+    serializer = LearnedArticleSerializer(learned_articles, many=True)
     return Response(serializer.data)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def generate_summary(request, article_id):
     try:
-        article = Article.objects.get(id=article_id, user=request.user)
+        article = Article.objects.get(id=article_id)
     except Article.DoesNotExist:
         return Response({'error': 'Article not found'}, status=status.HTTP_404_NOT_FOUND)
 

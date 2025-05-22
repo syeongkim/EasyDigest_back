@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import article_list, article_detail, my_articles, generate_summary
+from .views import *
 
 urlpatterns = [
-    path('', article_list),
+    path('', register_article),
     path('<int:article_id>/', article_detail),
     path('my/', my_articles),
     path('<int:article_id>/generate-summary/', generate_summary)
