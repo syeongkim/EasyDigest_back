@@ -61,7 +61,13 @@ def signup(request):
 
     user = User.objects.create_user(username=username, password=password, nickname=nickname, email=email, interest=interest)
     login(request, user)
-    return Response({'message': 'Signup successful and logged in.'})
+    refresh = RefreshToken.for_user(user)
+    return Response({
+        'message': 'Signup successful and logged in.',
+        'nickname': user.nickname,
+        'access': str(refresh.access_token),
+        'refresh': str(refresh)
+    })
 
 # 로그인
 @csrf_exempt
