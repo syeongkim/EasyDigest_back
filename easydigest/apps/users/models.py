@@ -12,11 +12,10 @@ class User(AbstractUser):
 
     class InterestChoices(models.TextChoices):
         POLITICS = "정치", "정치"
-        SOCIAL = "사회", "사회"
         ECONOMY = "경제", "경제"
-        CULTURE = "문화", "문화"
-        TECHNOLOGY = "기술", "기술"
-        ENTERTAIN = "연예", "연예"
+        SOCIAL = "사회", "사회"
+        CULTURE = "생활/문화", "생활/문화"
+        TECHNOLOGY = "IT/기술", "IT/기술"
 
     interest = models.CharField(
         max_length=20,
