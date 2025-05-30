@@ -8,9 +8,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer, InterestSerializer
-import uuid
 import requests
-from .utils import s3_file_upload_by_file_data
 
 
 User = get_user_model()
@@ -64,13 +62,12 @@ def signup(request):
             status = status.HTTP_400_BAD_REQUEST
         )
 
-    profile_picture_url = s3_file_upload_by_file_data(profile_picture_file)
     user = User.objects.create_user(
         username=username, 
         password=password, 
         nickname=nickname, 
         email=email, 
-        profile_picture=profile_picture_url,
+        profile_picture=profile_picture_file,
         interest=interest,
     )
     login(request, user)
