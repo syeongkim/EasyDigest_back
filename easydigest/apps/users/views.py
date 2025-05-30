@@ -8,7 +8,6 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer, InterestSerializer
-import uuid
 import requests
 
 
@@ -25,6 +24,7 @@ def signup(request):
     nickname = request.data.get('nickname')
     email = request.data.get('email')
     interest = request.data.get('interest')
+    profile_picture_file = request.FILES.get('profile_picture_file')
 
     if not username:
         return Response(
@@ -62,7 +62,14 @@ def signup(request):
             status = status.HTTP_400_BAD_REQUEST
         )
 
-    user = User.objects.create_user(username=username, password=password, nickname=nickname, email=email, interest=interest)
+    user = User.objects.create_user(
+        username=username, 
+        password=password, 
+        nickname=nickname, 
+        email=email, 
+        profile_picture=profile_picture_file,
+        interest=interest,
+    )
     login(request, user)
     refresh = RefreshToken.for_user(user)
     return Response({
