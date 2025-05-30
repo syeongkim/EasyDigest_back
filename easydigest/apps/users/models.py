@@ -9,6 +9,7 @@ class User(AbstractUser):
         null=False
     )
     email = models.EmailField(unique=True)
+    profile_picture = models.URLField(null=True, blank=True)
 
     class InterestChoices(models.TextChoices):
         POLITICS = "정치", "정치"

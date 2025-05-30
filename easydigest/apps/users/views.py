@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer, InterestSerializer
 import uuid
 import requests
+from .utils import s3_file_upload_by_file_data
 
 
 User = get_user_model()
@@ -25,6 +26,7 @@ def signup(request):
     nickname = request.data.get('nickname')
     email = request.data.get('email')
     interest = request.data.get('interest')
+    profile_picture_file = request.FILES.get('profile_picture_file')
 
     if not username:
         return Response(
@@ -62,7 +64,15 @@ def signup(request):
             status = status.HTTP_400_BAD_REQUEST
         )
 
-    user = User.objects.create_user(username=username, password=password, nickname=nickname, email=email, interest=interest)
+    profile_picture_url = s3_file_upload_by_file_data(profile_picture_file)
+    user = User.objects.create_user(
+        username=username, 
+        password=password, 
+        nickname=nickname, 
+        email=email, 
+        profile_picture=profile_picture_url,
+        interest=interest,
+    )
     login(request, user)
     refresh = RefreshToken.for_user(user)
     return Response({
