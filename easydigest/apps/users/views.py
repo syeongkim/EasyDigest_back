@@ -154,12 +154,6 @@ def change_password(request):
             status = status.HTTP_400_BAD_REQUEST
         )
     
-    if len(new_password) < 8:
-        return Response(
-            {"message": "새 비밀번호는 최소 8자 이상이어야 합니다."},
-            status = status.HTTP_400_BAD_REQUEST
-        )
-    
     user.set_password(new_password)
     user.save()
     return Response(
