@@ -44,10 +44,12 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.articles',
     'apps.words',
-    'apps.learning'
+    'apps.learning',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -56,6 +58,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://your-frontend-domain.com",
+    "http://localhost:8081",  # 개발용 React 등
+]
+
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'easydigest.urls'
 
