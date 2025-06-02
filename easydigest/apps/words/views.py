@@ -8,7 +8,6 @@ from rest_framework import status
 from .models import Word, LearnedWord
 from .serializers import WordSerializer
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
 from .gpt import analyze_pos_with_stanza, infer_overall_pos, retrieve_definition, generate_definition_with_gpt, simplify_with_gpt
 from apps.articles.models import Article
 import re, random
@@ -79,7 +78,6 @@ def user_words(request):
     return Response(serializer.data)
 
 # 사용자가 학습한 단어를 기사별로 조회
-@csrf_exempt
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def article_words(request, article_id):
