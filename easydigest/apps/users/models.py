@@ -11,13 +11,13 @@ class User(AbstractUser):
         null=False
     )
     email = models.EmailField(unique=True)
-    profile_picture = models.ImageField(
-        verbose_name='프로필 이미지',
-        upload_to="profile_image/",
-        storage=MediaStorage(),
-        blank=True,
-        null=True
-    )
+    # profile_picture = models.ImageField(
+    #     verbose_name='프로필 이미지',
+    #     upload_to="profile_image/",
+    #     storage=MediaStorage(),
+    #     blank=True,
+    #     null=True
+    # )
 
     class InterestChoices(models.TextChoices):
         POLITICS = "정치", "정치"

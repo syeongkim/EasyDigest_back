@@ -24,7 +24,7 @@ def signup(request):
     nickname = request.data.get('nickname')
     email = request.data.get('email')
     interest = request.data.get('interest')
-    profile_picture_file = request.FILES.get('profile_picture_file')
+    # profile_picture_file = request.FILES.get('profile_picture_file')
 
     if not username:
         return Response(
@@ -67,7 +67,7 @@ def signup(request):
         password=password, 
         nickname=nickname, 
         email=email, 
-        profile_picture=profile_picture_file,
+        # profile_picture=profile_picture_file,
         interest=interest,
     )
     login(request, user)
