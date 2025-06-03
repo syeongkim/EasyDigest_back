@@ -112,8 +112,15 @@ def logout_view(request):
 # 이름 중복 체크
 @api_view(['GET'])
 def check_username(request):
-    username = request.GET.get('username', '')
+    username = request.data.get('username')
     exists = User.objects.filter(username=username).exists()
+    return Response({'exists': exists})
+
+# 이름 중복 체크
+@api_view(['GET'])
+def check_email(request):
+    email = request.data.get('email')
+    exists = User.objects.filter(email=email).exists()
     return Response({'exists': exists})
 
 # 회원정보 조회
