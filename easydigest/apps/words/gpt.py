@@ -3,10 +3,10 @@ import stanza
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import openai
 
-# OpenAI 클라이언트 초기화
+# OpenAI client initialization
 client = openai.OpenAI(api_key="YOUR_OPEN_KEY")
 
-# 우리말샘 API 키
+# 우리말샘 API KEY
 API_KEY = "API_KEY"
 
 # ─── retrieval ────────────────────────────────────────────────────────────
