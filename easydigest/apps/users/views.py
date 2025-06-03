@@ -116,7 +116,7 @@ def check_username(request):
     exists = User.objects.filter(username=username).exists()
     return Response({'exists': exists})
 
-# 이름 중복 체크
+# 이메일 중복 체크
 @api_view(['GET'])
 def check_email(request):
     email = request.data.get('email')
