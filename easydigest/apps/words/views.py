@@ -8,7 +8,7 @@ from rest_framework import status
 from .models import Word, LearnedWord
 from .serializers import WordSerializer
 from django.utils import timezone
-from .gpt import analyze_pos_with_stanza, infer_overall_pos, retrieve_definition, generate_definition_with_gpt, simplify_with_gpt
+from .gpt import *
 from apps.articles.models import Article
 import re, random
 
@@ -39,12 +39,25 @@ def learn_word(request):
             status = status.HTTP_404_NOT_FOUND
         )
     
-    # 1. GPT로 쉬운 설명 생성
-    # description = explain_word_in_context(article.content, word_text)
+    # 3) Get definition (우리말샘 → GPT fallback)
     description = retrieve_definition(word_text)
+
+    #Extract the first sentence containing the word in the article sentences
+    context_sentence = ""
+    for sent in article.content.split("."):
+        if word_text in sent:
+            context_sentence = sent.strip() + "."
+            break
+    if not context_sentence:
+        context_sentence = article.content.split(".")[0].strip() + "."
+
+
     if not description:
-        description = generate_definition_with_gpt(description)
-    description = simplify_with_gpt(description, word_text)
+        # Generate definition dynamically by passing 'word' and 'context_sentence' to generate_definition_with_gpt
+        description = generate_definition_with_gpt(word_text, context_sentence)
+    
+    # 4) Easy context explanation
+    description = simplify_with_gpt(description, word_text, context_sentence)
 
     # 2. pos 분류 (추가 필요)
     toks = analyze_pos_with_stanza(word_text)
