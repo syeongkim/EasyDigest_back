@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Article, LearnedArticle
 from .serializers import ArticleSerializer, LearnedArticleSerializer
-from .gpt import summarize_article
+from .gpt import *
 from .utils import crawl_news_content
 
 # Create your views here.
@@ -71,7 +71,12 @@ def generate_summary(request, article_id):
     if article.summary:
         return Response({'summary': article.summary}, status=status.HTTP_200_OK)
 
-    summary = summarize_article(article.content)
+    # 1) Article summary
+    raw_summary = summarize_article(article.content)
+
+    # 1-2) Refining the summary with GPT
+    summary = refine_summary_with_gpt(raw_summary)
+    
     article.summary = summary
     article.save()
 

@@ -2,12 +2,16 @@ import requests
 import stanza
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import openai
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+OPENAI_KEY = os.getenv("OPENAI_KEY")
+STDICT_KEY = os.getenv("STDICT_KEY")
 
 # OpenAI client initialization
-client = openai.OpenAI(api_key="YOUR_OPEN_KEY")
-
-# 우리말샘 API KEY
-API_KEY = "API_KEY"
+client = openai.OpenAI(api_key=OPENAI_KEY)
 
 # ─── retrieval ────────────────────────────────────────────────────────────
 
@@ -78,7 +82,7 @@ def get_lemma(word: str):
 def retrieve_definition(word: str) -> str:
     search_url = "https://stdict.korean.go.kr/api/search.do"
     params = {
-        "key":      API_KEY,
+        "key":      STDICT_KEY,
         "q":        word,
         "req_type": "json",
         "start":    1,
