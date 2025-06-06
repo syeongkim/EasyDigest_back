@@ -112,14 +112,14 @@ def logout_view(request):
 # 이름 중복 체크
 @api_view(['GET'])
 def check_username(request):
-    username = request.data.get('username')
+    username = request.GET.get('username')
     exists = User.objects.filter(username=username).exists()
     return Response({'exists': exists})
 
 # 이메일 중복 체크
 @api_view(['GET'])
 def check_email(request):
-    email = request.data.get('email')
+    email = request.GET.get('email')
     exists = User.objects.filter(email=email).exists()
     return Response({'exists': exists})
 
