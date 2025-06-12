@@ -35,13 +35,13 @@ class User(AbstractUser):
     @property
     def level(self):
         correct = self.total_correct_count
-        if correct < 20:
+        if correct < 10:
             return 1 
-        elif correct < 40:
+        elif correct < 20:
             return 2
-        elif correct < 60:
+        elif correct < 30:
             return 3
-        elif correct < 80:
+        elif correct < 40:
             return 4
         else:
             return 5
